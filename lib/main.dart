@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import './secondView.dart';
+import 'package:provider/provider.dart';
+import 'second_view.dart';
+import 'model.dart';
+import 'todo_list.dart';
 
 void main() {
-  runApp(const MyApp());
+  var state = MyState();
+  runApp(
+      ChangeNotifierProvider(create: (context) => state, child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -36,17 +41,30 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SecondView()));
-            },
+            onPressed: () {},
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
+      body: Consumer<MyState>(
+          builder: (context, state, child) => TodoList(state.list)),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () async {
+            var newTodo = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SecondView(
+                        /*CheckBoxState(title: '',
+                    Provider.of<MyState>(context).TodoList)*/
+                        )));
+          }),
+    );
+  }
+}
+
+/*
+  
+            children: <Widget>[
             Container(height: 20),
             _checkbox('Write a book'),
             _divide(),
@@ -65,13 +83,8 @@ class _MyHomePageState extends State<MyHomePage> {
             _checkbox('Meditate'),
             _divide(),
           ],
-        ),
-      ),
-      floatingActionButton:
-          FloatingActionButton(child: const Icon(Icons.add), onPressed: () {}),
-    );
-  }
-
+  
+  
   Widget _checkbox(String text) {
     return Row(
       children: [
@@ -109,3 +122,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+*/
