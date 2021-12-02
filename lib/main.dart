@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'second_view.dart';
+import 'add_view.dart';
 import 'model.dart';
 import 'todo_list.dart';
 
 void main() {
   var state = MyState();
+  state.getTodo();
   runApp(
       ChangeNotifierProvider(create: (context) => state, child: const MyApp()));
 }
@@ -39,87 +40,47 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
         title: Text(widget.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
+          PopupMenuButton(
+              onSelected: (String value) => {
+                    Provider.of<MyState>(context, listen: false)
+                        .setFilterBy(value)
+                  },
+              itemBuilder: (context) => [
+                    PopupMenuItem(child: Text('Done'), value: 'Done'),
+                    PopupMenuItem(child: Text('Undone'), value: 'Undone'),
+                    PopupMenuItem(child: Text('All'), value: 'All'),
+                  ]),
         ],
       ),
       body: Consumer<MyState>(
-          builder: (context, state, child) => TodoList(state.list)),
+        builder: (context, state, child) =>
+            TodoList(_filterList(state.list, state.filterBy)),
+      ),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () async {
-            var newTodo = await Navigator.push(
+            var newTodoTitle = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SecondView(
-                        /*CheckBoxState(title: '',
-                    Provider.of<MyState>(context).TodoList)*/
-                        )));
+                    builder: (context) => AddView(TodoCheckboxes(
+                          title: '',
+                          id: '',
+                        ))));
+            if (newTodoTitle != null) {
+              Provider.of<MyState>(context, listen: false)
+                  .addTodo(newTodoTitle);
+            }
           }),
     );
   }
-}
 
-/*
-  
-            children: <Widget>[
-            Container(height: 20),
-            _checkbox('Write a book'),
-            _divide(),
-            _checkbox('Do homework'),
-            _divide(),
-            _checkedcheckbox('Tidy room'),
-            _divide(),
-            _checkbox('Watch TV'),
-            _divide(),
-            _checkbox('Nap'),
-            _divide(),
-            _checkbox('Shop groceries'),
-            _divide(),
-            _checkbox('Have fun'),
-            _divide(),
-            _checkbox('Meditate'),
-            _divide(),
-          ],
-  
-  
-  Widget _checkbox(String text) {
-    return Row(
-      children: [
-        Checkbox(
-          value: false,
-          onChanged: (val) {},
-        ),
-        Text(text, style: const TextStyle(fontSize: 21)),
-        const Spacer(),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.clear)),
-      ],
-    );
-  }
-
-  Widget _checkedcheckbox(String text) {
-    return Row(
-      children: [
-        Checkbox(
-          value: true,
-          onChanged: (val) {},
-        ),
-        Text(text,
-            style: const TextStyle(
-                decoration: TextDecoration.lineThrough, fontSize: 21)),
-        const Spacer(),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.clear)),
-      ],
-    );
-  }
-
-  Widget _divide() {
-    return const Divider(
-      height: 15,
-      thickness: 1,
-    );
+  List<TodoCheckboxes> _filterList(list, filterBy) {
+    if (filterBy == "Done") {
+      return list.where((checkbox) => checkbox.done == true).toList();
+    }
+    if (filterBy == "Undone") {
+      return list.where((checkbox) => checkbox.done == false).toList();
+    }
+    return list;
   }
 }
-*/

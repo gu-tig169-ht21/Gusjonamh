@@ -1,33 +1,70 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'api.dart';
 
-class CheckBoxState {
-  final String title;
-  bool value;
+class TodoCheckboxes {
+  String id;
+  String title;
+  bool done;
 
-  CheckBoxState({
+  TodoCheckboxes({
+    required this.id,
     required this.title,
-    this.value = false,
+    this.done = false,
   });
+
+  static Map<String, dynamic> toJson(TodoCheckboxes checkboxes) {
+    return {
+      'title': checkboxes.title,
+      'done': checkboxes.done,
+    };
+  }
+
+  static TodoCheckboxes fromJson(Map<String, dynamic> json) {
+    return TodoCheckboxes(
+      id: json['id'],
+      title: json['title'],
+      done: json['done'],
+    );
+  }
 }
 
 class MyState extends ChangeNotifier {
-  final List<CheckBoxState> _list = [
-    CheckBoxState(title: 'Write a book'),
-    CheckBoxState(title: 'Do homework'),
-    CheckBoxState(title: 'Tidy room'),
-    CheckBoxState(title: 'Write a poem'),
-  ];
+  List<TodoCheckboxes> _list = [];
 
-  List<CheckBoxState> get list => _list;
+  String _filterBy = 'All';
+  String get filterBy => _filterBy;
 
-  void checkboxValue(CheckBoxState checkbox, bool value) {
-    checkbox.value = !checkbox.value;
+  List<TodoCheckboxes> get list => _list;
+
+  Future getTodo() async {
+    List<TodoCheckboxes> list = await Api.getTodo();
+    _list = list;
     notifyListeners();
   }
 
-  void removeTodo(CheckBoxState checkbox) {
-    _list.remove(checkbox);
+  void checkboxValue(TodoCheckboxes checkbox, bool done) {
+    checkbox.done = !checkbox.done;
+    notifyListeners();
+  }
+
+  void removeTodo(TodoCheckboxes checkbox) async {
+    _list = await Api.deleteTodo(checkbox.id);
+    notifyListeners();
+  }
+
+  void addTodo(TodoCheckboxes checkbox) async {
+    _list = await Api.addTodoToList(checkbox);
+    notifyListeners();
+  }
+
+  void setFilterBy(String filterBy) {
+    _filterBy = filterBy;
+    notifyListeners();
+  }
+
+  void changeTodo(TodoCheckboxes checkbox, bool done) async {
+    checkbox.done = !checkbox.done;
+    _list = await Api.updateTodo(checkbox, checkbox.id);
     notifyListeners();
   }
 }

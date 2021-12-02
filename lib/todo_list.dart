@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'model.dart';
 
 class TodoList extends StatelessWidget {
-  final List<CheckBoxState> list;
+  final List<TodoCheckboxes> list;
   TodoList(this.list);
   Widget build(BuildContext context) {
     return ListView(
@@ -12,24 +12,22 @@ class TodoList extends StatelessWidget {
             .toList());
   }
 
-  Widget buildSinglecheckbox(CheckBoxState checkbox, context) =>
+  Widget buildSinglecheckbox(TodoCheckboxes checkbox, context) =>
       CheckboxListTile(
         controlAffinity: ListTileControlAffinity.leading,
-        value: checkbox.value,
+        value: checkbox.done,
         title: Text(checkbox.title,
             style: TextStyle(
                 fontSize: 20,
-                decoration:
-                    checkbox.value ? TextDecoration.lineThrough : null)),
+                decoration: checkbox.done ? TextDecoration.lineThrough : null)),
         onChanged: (value) {
           var state = Provider.of<MyState>(context, listen: false);
-          state.checkboxValue(checkbox, false);
+          state.changeTodo(checkbox, false);
         },
         secondary: IconButton(
-          icon: Icon(Icons.delete),
+          icon: const Icon(Icons.delete),
           onPressed: () {
-            var state = Provider.of<MyState>(context, listen: false);
-            state.removeTodo(checkbox);
+            Provider.of<MyState>(context, listen: false).removeTodo(checkbox);
           },
         ),
       );
